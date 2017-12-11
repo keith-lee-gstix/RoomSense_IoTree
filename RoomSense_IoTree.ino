@@ -4,6 +4,9 @@
  *   The tree's lights turn on when the room is occupied and deactivates
  *   after a variable interval (in minutes) of inactivity elapses.
  *   
+ *   Also delivers relative humidity, temperature and barometric pressure to
+ *   the Cayenne application.
+ *   
  *   Circuit:
  *   Pin 10 connected to +ve terminal of relay
  *   GND connected to -ve terminal of relay
@@ -15,7 +18,7 @@
 
 
 #define RELAY_PIN 10
-#define CAYENNE_DEBUG
+//#define CAYENNE_DEBUG
 #define CAYENNE_PRINT Serial
 #define TX_INTERVAL 300
 #define PIR_DOUT 0
@@ -26,7 +29,7 @@
 #include <SparkFun_Si7021_Breakout_Library.h>
 #include <Wire.h>
 #include <MS5611.h>
-#include <WiFi101OTA.h>
+//#include <WiFi101OTA.h>
 
 int idleTime = 0;
 bool wasActive = false;
@@ -47,7 +50,6 @@ int pirStatus;
 void setup() {
   pinMode(RELAY_PIN, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(UB_LED_PIN, OUTPUT);
   pinMode(PIR_DOUT, INPUT);
   digitalWrite(RELAY_PIN, LOW);
   
@@ -59,7 +61,7 @@ void setup() {
   millisStart = millis();
   millisLastTx = millisStart;
 
-  WiFiOTA.begin("OfficeTree", otaPass, InternalStorage);
+//  WiFiOTA.begin("OfficeTree", otaPass, InternalStorage);
   Cayenne.virtualWrite(4, idleMinutes, "IdleTime", "Minutes");
 }
 
@@ -109,7 +111,7 @@ pirStatus = digitalRead(PIR_DOUT);
       Serial.print("Time expired.  Relay off\n");
     }
   }
-  WiFiOTA.poll();
+//  WiFiOTA.poll();
   Cayenne.loop();
 }
 
@@ -145,7 +147,6 @@ CAYENNE_IN(7)
   relayOn = true;
   idleTime = 0;
   wasActive = true;
-  delay(50);
   Cayenne.virtualWrite(7, 0, "reply", "bool");
   Serial.print("Manually activated the tree");
 }
