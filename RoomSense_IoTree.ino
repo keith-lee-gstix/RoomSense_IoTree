@@ -34,6 +34,7 @@
 int idleTime = 0;
 bool wasActive = false;
 bool relayOn = false;
+bool updateIdleMinutes = true;
 
 float humidity = 0;
 float temp = 0;
@@ -62,7 +63,6 @@ void setup() {
   millisLastTx = millisStart;
 
 //  WiFiOTA.begin("OfficeTree", otaPass, InternalStorage);
-  Cayenne.virtualWrite(4, idleMinutes, "IdleTime", "Minutes");
 }
 
 void loop() {
@@ -133,21 +133,28 @@ void txData()
   Cayenne.virtualWrite(2, humidity, "rel_hum","p");
   Cayenne.virtualWrite(3, pressure, "bp", "pa");
   Cayenne.virtualWrite(5, relayOn, "prox", "bool");
-  Cayenne.virtualWrite(6, idleTime, "time", "minutes");
+  Cayenne.virtualWrite(6, idleTime);
+  Cayenne.virtualWrite(7, relayOn);
+  if(updateIdleMinutes)
+  {
+    Cayenne.virtualWrite(4, idleMinutes);
+    updateIdleMinutes = false;
+  }
+
 }
 
 CAYENNE_IN(4)
 {
   idleMinutes = getValue.asInt();
+  updateIdleMinutes = true;
   Serial.print("Recived new idle timeout\n");
 }
 CAYENNE_IN(7)
 {
-  digitalWrite(RELAY_PIN, HIGH);
-  relayOn = true;
+  relayOn = !(getValue.asInt() == 0);
+  digitalWrite(RELAY_PIN, relayOn);
   idleTime = 0;
   wasActive = true;
-  Cayenne.virtualWrite(7, 0, "reply", "bool");
-  Serial.print("Manually activated the tree");
+  Serial.print("Manually toggled the tree");
 }
 
