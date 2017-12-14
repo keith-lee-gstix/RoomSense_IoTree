@@ -22,6 +22,7 @@
 #define CAYENNE_PRINT Serial
 #define TX_INTERVAL 300
 #define PIR_DOUT 0
+#define BRIGHT_LED 9
 
 
 #include <CayenneMQTTMKR1000.h>
@@ -52,6 +53,8 @@ void setup() {
   pinMode(RELAY_PIN, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(PIR_DOUT, INPUT);
+  pinMode(BRIGHT_LED, OUTPUT);
+  digitalWrite(BRIGHT_LED, HIGH);
   digitalWrite(RELAY_PIN, LOW);
   
   Serial.begin(9600);
@@ -91,6 +94,10 @@ pirStatus = digitalRead(PIR_DOUT);
     {
       
       millisInter = millis();
+      if((millisInter%2) || (millisInter%2000))
+      {
+        digitalWrite(BRIGHT_LED, !(digitalRead(BRIGHT_LED)));
+      }
       if(millisInter - millisLastTx >= TX_INTERVAL)
       {
         txData();
